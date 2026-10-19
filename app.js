@@ -20,13 +20,14 @@ function home(){ const done=D.organs.filter(o=>o.status==="done").length, n=D.or
   main.querySelectorAll(".organ.done").forEach(b=>b.onclick=()=>{S.organ=b.dataset.o;S.q="";setView("search");}); }
 const core=e=>(e.entity+" "+e.variants+" "+e.remarks+" "+e.subgroup).toLowerCase();
 const desc=e=>((e.histo||"")+" "+(e.cyto||"")+" "+(e.ihc||"")).toLowerCase();
-function filtered(){ const terms=S.q.toLowerCase().trim().split(/\s+/).filter(Boolean);
+function rank(e,terms,q){ const n=e.entity.toLowerCase(), nb=n.replace(/\s*\(.*?\)\s*/g," ").trim(), has=s=>terms.every(t=>s.includes(t));
+  if(n===q||nb===q) return 0; if(n.startsWith(q)||nb.startsWith(q)) return 1; if(has(n)) return 2;
+  if(has((e.variants||"").toLowerCase())) return 3; if(has(core(e))) return 4;
+  if(S.deep&&has(core(e)+" "+desc(e))) return 5; return -1; }
+function filtered(){ const q=S.q.toLowerCase().trim().replace(/\s+/g," "), terms=q.split(" ").filter(Boolean);
   const base=D.entities.filter(e=>(!S.organ||e.organ===S.organ)&&S.cats.has(ci(e)));
   if(!terms.length) return base;
-  const a=[],b=[]; for(const e of base){ const c=core(e);
-    if(terms.every(t=>c.includes(t))) a.push(e);
-    else if(S.deep){ const all=c+" "+desc(e); if(terms.every(t=>all.includes(t))){ e._desc=1; b.push(e);} } }
-  return a.concat(b); }
+  return base.map((e,i)=>[rank(e,terms,q),i,e]).filter(x=>x[0]>=0).sort((x,y)=>x[0]-y[0]||x[1]-y[1]).map(x=>x[2]); }
 function snippet(text,q){ const t=q.trim().split(/\s+/)[0]; if(!t||!text) return ""; const i=text.toLowerCase().indexOf(t.toLowerCase()); if(i<0) return "";
   const s=Math.max(0,i-70); return (s?"…":"")+text.slice(s,i+130)+"…"; }
 function search(){ const doneOrgans=D.organs.filter(o=>o.status==="done");
