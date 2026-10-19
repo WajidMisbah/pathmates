@@ -86,5 +86,20 @@ $("#darkBtn").onclick=()=>applyDark(!document.documentElement.classList.contains
 document.querySelectorAll("nav [data-v]").forEach(b=>b.onclick=()=>{ if(b.dataset.v==="search"&&S.view!=="search"){} setView(b.dataset.v); });
 $("#homeBtn").onclick=()=>{S.organ="";setView("home");};
 applyDark(store.get("pm_dark", matchMedia("(prefers-color-scheme: dark)").matches));
-fetch("data.json").then(r=>r.json()).then(d=>{D=d; setView("home");}).catch(()=>main.innerHTML="<p>Could not load data.</p>");
-if("serviceWorker" in navigator) addEventListener("load",()=>navigator.serviceWorker.register("sw.js").then(r=>window.__swReg=r).catch(console.error));
+fetch("data.json").then(r=>r.json()).then(d=>{D=d; setView("home"); showVersion();}).catch(()=>main.innerHTML="<p>Could not load data.</p>");
+async function showVersion(){ const el=$("#ver"); if(!el) return; let v="";
+  try{ const k=(await caches.keys()).filter(x=>x.startsWith("pathmates-")); v=k.length?k[k.length-1].slice(10):""; }catch{}
+  el.textContent="App version "+(v||"(not cached yet)")+(D?" · data "+D.generated.slice(0,10):""); }
+if("serviceWorker" in navigator){
+  const hadController=!!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener("controllerchange",()=>{
+    if(!hadController){ showVersion(); return; }               // first install: no reload needed
+    if(sessionStorage.getItem("pm_reloaded")) return;          // loop guard
+    sessionStorage.setItem("pm_reloaded","1"); location.reload(); });
+  navigator.serviceWorker.addEventListener("message",e=>{ if(e.data&&e.data.version) showVersion(); });
+  addEventListener("load",()=>navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).then(r=>{
+    window.__swReg=r; r.update().catch(()=>{});
+    document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible") r.update().catch(()=>{}); });
+    navigator.serviceWorker.ready.then(()=>setTimeout(()=>{showVersion(); setTimeout(()=>sessionStorage.removeItem("pm_reloaded"),3000);},300));
+  }).catch(console.error));
+}
