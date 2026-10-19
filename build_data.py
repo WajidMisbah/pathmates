@@ -20,6 +20,9 @@ def read_xlsx(p):
             if h.startswith(name): return i
         raise KeyError(name)
     ci = {k: col(k) for k in ["category","subgroup","entity","variants","remarks"]}
+    for k,pre in [("histo","histopath"),("cyto","cytopath"),("ihc","immuno")]:
+        i = next((j for j,h in enumerate(hdr) if h.startswith(pre)), None)
+        if i is not None: ci[k] = i
     out = []
     for r in rows[1:]:
         if not r or not r[ci["entity"]]: continue
