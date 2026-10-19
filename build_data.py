@@ -49,6 +49,11 @@ def main():
             e.update(id=f"{idx}-{n}", organ=o["name"], organIndex=idx); entities.append(e)
     data = {"generated": datetime.datetime.now().isoformat(timespec="seconds"),
             "categories": CATS, "organs": organs, "entities": entities}
+    try:  # keep old timestamp if content unchanged, so no-op runs produce no diff
+        old = json.load(open(a.out, encoding="utf-8"))
+        if {k: old.get(k) for k in ("categories","organs","entities")} == {k: data[k] for k in ("categories","organs","entities")}:
+            data["generated"] = old.get("generated", data["generated"])
+    except Exception: pass
     s = json.dumps(data, ensure_ascii=False, separators=(",",":"))
     open(a.out, "w", encoding="utf-8").write(s)
     h = hashlib.sha1(s.encode())
