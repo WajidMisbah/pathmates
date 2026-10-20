@@ -31,3 +31,5 @@ header nav{display:flex;flex-wrap:nowrap}@media(max-width:480px){.logo span{disp
 .tab{background:none;border:0;border-bottom:3px solid transparent;padding:8px 10px;font:inherit;color:var(--mut);cursor:pointer}
 .tab.on{color:var(--pri);border-bottom-color:var(--pri);font-weight:650}.tabbody p,.desc{margin:8px 0;line-height:1.55}
 .tog{display:flex;gap:6px;align-items:center;margin:4px 0}.tog input{width:auto}
+
+.logo{display:flex;align-items:center;gap:6px}.logo-img{height:26px;width:26px;display:block}
