@@ -1,4 +1,4 @@
-const VERSION = "89f463e875";
+const VERSION = "78011961b5";
 const CACHE = "pathmates-" + VERSION;
 const ASSETS = ["./","index.html","style.css","app.js","data.json","manifest.json","icons/icon-192.png","icons/icon-512.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting())); });
